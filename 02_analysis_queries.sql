@@ -1,12 +1,7 @@
--- ==================================================================
+
 -- E-COMMERCE BUSINESS LOGIC & ANALYSIS QUERIES
--- Run after 01_schema_setup.sql and data load
--- ==================================================================
 
-
--- ------------------------------------------------------------------
--- 1. REVENUE & SALES TRENDS — Month-over-Month Growth
--- ------------------------------------------------------------------
+-- REVENUE & SALES TRENDS — Month-over-Month Growth
 
 WITH MoM_sales AS 
 (
@@ -33,10 +28,9 @@ SELECT
 FROM MoM_growth
 ORDER BY Monthly_sales;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 2. REVENUE & SALES TRENDS — Quarter-over-Quarter Growth
--- ------------------------------------------------------------------
+-- REVENUE & SALES TRENDS — Quarter-over-Quarter Growth
 
 WITH QoQ_revenue AS (
     SELECT 
@@ -71,10 +65,9 @@ SELECT
     ) AS QoQ_pct
 FROM QoQ_growth;  
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 3. REVENUE & SALES TRENDS — Year-over-Year Growth
--- ------------------------------------------------------------------
+-- REVENUE & SALES TRENDS — Year-over-Year Growth
 
 WITH YoY_revenue AS
 (
@@ -102,10 +95,9 @@ WITH YoY_revenue AS
         ROUND(COALESCE(100*(Total_revenue-Prev_year)/NULLIF(Prev_year,0),0),2) AS YoY_pct
 	FROM YoY_growth; 
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 4. CUSTOMER VALUE — CLV Ranking
--- ------------------------------------------------------------------
+-- CUSTOMER VALUE — CLV Ranking
 
 SELECT 
 	C.customer_id,
@@ -121,10 +113,9 @@ WHERE O.order_status = 'Delivered'
 GROUP BY C.customer_id,C.customer_name
 ORDER BY SUM(O.total_Amount) DESC;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 5. PRODUCT PERFORMANCE — Revenue Leakage (cancellations & returns)
--- ------------------------------------------------------------------
+-- PRODUCT PERFORMANCE — Revenue Leakage (cancellations & returns)
 
 WITH product_leakage AS (
     SELECT 
@@ -160,10 +151,9 @@ FROM product_leakage
 WHERE gross_revenue > 0
 ORDER BY total_leakage DESC;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 6. RETENTION — New vs Repeat Customer Revenue Split (by month)
--- ------------------------------------------------------------------
+-- RETENTION — New vs Repeat Customer Revenue Split (by month)
 
 WITH first_order AS (
     SELECT 
@@ -187,10 +177,9 @@ WHERE O.order_status = 'Delivered'
 GROUP BY order_month, customer_type
 ORDER BY order_month, customer_type;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 7. RETENTION — Churn Flag (days since last order)
--- ------------------------------------------------------------------
+--  RETENTION — Churn Flag (days since last order)
 
 SELECT
     C.customer_id,
@@ -202,10 +191,9 @@ JOIN Orders O ON C.customer_id = O.customer_id
 GROUP BY C.customer_id, C.customer_name
 ORDER BY DATEDIFF(CURDATE(), MAX(O.order_date)) DESC;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 8. CUSTOMER REVENUE BY COUNTRY & DEMOGRAPHICS
--- ------------------------------------------------------------------
+-- CUSTOMER REVENUE BY COUNTRY & DEMOGRAPHICS
 
 SELECT
     C.country,
@@ -220,10 +208,9 @@ WHERE O.order_status = 'Delivered'
 GROUP BY C.country, C.gender, C.age_group
 ORDER BY total_revenue DESC;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 9. COHORT ANALYSIS — Customer Retention Rate by Cohort Month
--- ------------------------------------------------------------------
+-- COHORT ANALYSIS — Customer Retention Rate by Cohort Month
 
 WITH cohort_base AS (
     SELECT
@@ -272,10 +259,9 @@ JOIN cohort_size cs
     ON cc.cohort_month = cs.cohort_month
 ORDER BY cc.cohort_month, cc.period_number;
 
+-- ==================================================================
 
--- ------------------------------------------------------------------
--- 10. COHORT ANALYSIS — Revenue-Based Cohort View
--- ------------------------------------------------------------------
+-- COHORT ANALYSIS — Revenue-Based Cohort View
 
 WITH cohort_base AS (
     SELECT customer_id, DATE_FORMAT(MIN(order_date), '%Y-%m-01') AS cohort_month
@@ -291,3 +277,5 @@ FROM orders o
 JOIN cohort_base cb ON o.customer_id = cb.customer_id
 GROUP BY cb.cohort_month
 ORDER BY cb.cohort_month;
+
+-- ==================================================================
