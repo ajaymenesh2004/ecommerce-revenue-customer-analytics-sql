@@ -1,33 +1,19 @@
--- ==================================================================
+
 -- E-COMMERCE ETL SCHEMA SETUP
--- Load order: customers, products -> orders -> reviews
--- (Customers & Products must load first — Orders references both;
---  Reviews references Orders, Customers, and Products)
--- ==================================================================
 
--- ==================================================================
--- SECTION 1: DATABASE SETUP
--- ==================================================================
 
+ DATABASE SETUP
 CREATE DATABASE ecommerce;
 USE ecommerce;
-
--- ==================================================================
--- SECTION 2: DROP EXISTING TABLES (reverse dependency order —
--- child tables dropped before the parent tables they reference)
--- ==================================================================
 
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS customers;
 
--- ==================================================================
--- SECTION 3: CREATE TABLES (parent tables first, so foreign keys
--- in child tables have something to reference)
--- ==================================================================
+-- CREATE TABLES 
 
--- 3.1 Customers (parent table — referenced by Orders and Reviews)
+-- Customers (parent table — referenced by Orders and Reviews)
 CREATE TABLE customers (
     customer_id     VARCHAR(20)     NOT NULL,
     customer_name   VARCHAR(120)    NOT NULL,
@@ -38,7 +24,7 @@ CREATE TABLE customers (
     PRIMARY KEY (customer_id)
 );
 
--- 3.2 Products (parent table — referenced by Orders and Reviews)
+-- Products (parent table — referenced by Orders and Reviews)
 CREATE TABLE products (
     product_id      VARCHAR(20)     NOT NULL,
     product_name    VARCHAR(150)    NOT NULL,
@@ -47,7 +33,7 @@ CREATE TABLE products (
     PRIMARY KEY (product_id)
 );
 
--- 3.3 Orders (child of Customers + Products; parent of Reviews)
+-- Orders (child of Customers + Products; parent of Reviews)
 CREATE TABLE orders (
     order_id        VARCHAR(20)     NOT NULL,
     customer_id     VARCHAR(20)     NOT NULL,
@@ -65,7 +51,7 @@ CREATE TABLE orders (
         FOREIGN KEY (product_id) REFERENCES products (product_id)
 );
 
--- 3.4 Reviews (child of Orders, Customers, and Products)
+-- Reviews (child of Orders, Customers, and Products)
 CREATE TABLE reviews (
     review_id       VARCHAR(20)     NOT NULL,
     order_id        VARCHAR(20)     NOT NULL,
@@ -82,12 +68,3 @@ CREATE TABLE reviews (
     CONSTRAINT fk_reviews_product
         FOREIGN KEY (product_id) REFERENCES products (product_id)
 );
-
--- ==================================================================
--- SECTION 4: RAW TABLE PREVIEWS (sanity check after data load)
--- ==================================================================
-
-SELECT * FROM customers;
-SELECT * FROM products;
-SELECT * FROM orders;
-SELECT * FROM reviews;
